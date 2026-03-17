@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
-export async function middleware(req) {
+export async function proxy(req) {
   const { pathname } = req.nextUrl
 
   const token = await getToken({
@@ -19,12 +19,12 @@ export async function middleware(req) {
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/admin')
 
-  // 🔒 Protected route
+  // Protected route — login না থাকলে /login এ পাঠাও
   if (isProtected && !isLoggedIn) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 
-  // 🔁 Auth page access while logged in
+  // Already logged in — /login বা /register এ গেলে /dashboard এ পাঠাও
   if (isAuthPage && isLoggedIn) {
     return NextResponse.redirect(new URL('/dashboard', req.url))
   }
