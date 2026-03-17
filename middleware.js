@@ -15,19 +15,18 @@ export async function middleware(req) {
     pathname === '/login' ||
     pathname === '/register'
 
-  const isDashboard = pathname.startsWith('/dashboard')
-  const isAdmin = pathname.startsWith('/admin')
+  const isProtected =
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/admin')
 
-  if (isDashboard && !isLoggedIn) {
-    return NextResponse.redirect(new URL('/login', req.nextUrl))
+  // 🔒 Protected route
+  if (isProtected && !isLoggedIn) {
+    return NextResponse.redirect(new URL('/login', req.url))
   }
 
-  if (isAdmin && !isLoggedIn) {
-    return NextResponse.redirect(new URL('/login', req.nextUrl))
-  }
-
+  // 🔁 Auth page access while logged in
   if (isAuthPage && isLoggedIn) {
-    return NextResponse.redirect(new URL('/dashboard', req.nextUrl))
+    return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
   return NextResponse.next()
