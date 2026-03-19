@@ -8,6 +8,12 @@ export const metadata = {
   title: 'HPCAA | Hamdard Public College Alumni Association',
   description:
     'Hamdard Public College Alumni Association (HPCAA) — হামদর্দ পাবলিক কলেজের প্রাক্তন শিক্ষার্থীদের অফিসিয়াল প্ল্যাটফর্ম। Events, news, jobs এবং alumni network।',
+
+  icons: {
+  icon: '/images/hpcaa-icon.png',
+  shortcut: '/images/hpcaa-icon.png',
+  apple: '/images/hpcaa-icon.png',
+  },
   keywords: [
     // ── Short forms ──
     'HPCAA',
