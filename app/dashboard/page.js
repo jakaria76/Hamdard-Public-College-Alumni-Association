@@ -47,9 +47,12 @@ export default function DashboardPage() {
     { id: 'donate', icon: '💰', label: 'Donate', path: '/donate' },
   ]
 
+  // ✅ session check — unauthenticated হলে login এ পাঠাও
   useEffect(() => {
-    if (status === 'unauthenticated') router.push('/login')
-  }, [status, router])
+    if (status === 'unauthenticated') {
+      window.location.href = '/login'
+    }
+  }, [status])
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -70,6 +73,9 @@ export default function DashboardPage() {
     )
   }
 
+  // ✅ session না থাকলে কিছু render করো না
+  if (!session) return null
+
   const userName = session?.user?.name || 'Alumni'
   const userInitial = userName.charAt(0).toUpperCase()
 
@@ -78,339 +84,100 @@ export default function DashboardPage() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=Noto+Serif+Bengali:wght@600;700&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        /* ── Marquee ── */
         .marquee-wrap { flex: 1; overflow: hidden; }
-        .marquee-track {
-          display: flex; gap: 60px;
-          animation: marquee 30s linear infinite;
-          white-space: nowrap;
-        }
-        @keyframes marquee {
-          from { transform: translateX(0); }
-          to   { transform: translateX(-50%); }
-        }
-
-        /* ── Typewriter ── */
-        @keyframes typing1 {
-          from { width: 0; }
-          to   { width: 100%; }
-        }
-        @keyframes typing2 {
-          from { width: 0; opacity: 1; }
-          to   { width: 100%; opacity: 1; }
-        }
-        @keyframes typing3 {
-          from { width: 0; opacity: 1; }
-          to   { width: 100%; opacity: 1; }
-        }
-        @keyframes blink {
-          from, to { border-color: transparent; }
-          50%      { border-color: #1a2e1a; }
-        }
-        @keyframes blink2 {
-          from, to { border-color: transparent; }
-          50%      { border-color: #2a5c2a; }
-        }
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(6px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .type-line1 {
-          overflow: hidden;
-          white-space: nowrap;
-          border-right: 2.5px solid #1a2e1a;
-          width: 0;
-          animation:
-            typing1 1.8s steps(22, end) 0.3s forwards,
-            blink   0.7s step-end 0.3s 4;
-        }
-        .type-line2 {
-          overflow: hidden;
-          white-space: nowrap;
-          border-right: 2.5px solid #2a5c2a;
-          width: 0;
-          opacity: 0;
-          animation:
-            typing2 1.4s steps(16, end) 2.3s forwards,
-            blink2  0.7s step-end 2.3s 4;
-        }
-        .type-line3 {
-          opacity: 0;
-          animation: fadeUp 0.8s ease 3.9s forwards;
-        }
-
-        /* ── Navbar ── */
-        .nav-link {
-          color: #d8ecc8; font-size: 13.5px; font-weight: 400;
-          padding: 11px 16px; cursor: pointer;
-          transition: all 0.15s; white-space: nowrap;
-          border-bottom: 2px solid transparent;
-        }
+        .marquee-track { display: flex; gap: 60px; animation: marquee 30s linear infinite; white-space: nowrap; }
+        @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @keyframes typing1 { from { width: 0; } to { width: 100%; } }
+        @keyframes typing2 { from { width: 0; opacity: 1; } to { width: 100%; opacity: 1; } }
+        @keyframes blink { from, to { border-color: transparent; } 50% { border-color: #1a2e1a; } }
+        @keyframes blink2 { from, to { border-color: transparent; } 50% { border-color: #2a5c2a; } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .type-line1 { overflow: hidden; white-space: nowrap; border-right: 2.5px solid #1a2e1a; width: 0; animation: typing1 1.8s steps(22, end) 0.3s forwards, blink 0.7s step-end 0.3s 4; }
+        .type-line2 { overflow: hidden; white-space: nowrap; border-right: 2.5px solid #2a5c2a; width: 0; opacity: 0; animation: typing2 1.4s steps(16, end) 2.3s forwards, blink2 0.7s step-end 2.3s 4; }
+        .type-line3 { opacity: 0; animation: fadeUp 0.8s ease 3.9s forwards; }
+        .nav-link { color: #d8ecc8; font-size: 13.5px; font-weight: 400; padding: 11px 16px; cursor: pointer; transition: all 0.15s; white-space: nowrap; border-bottom: 2px solid transparent; }
         .nav-link:hover { color: #fff; background: rgba(134,179,105,0.15); }
         .nav-link.active { color: #86b369; border-bottom-color: #86b369; font-weight: 600; }
-
-        /* ── Sidebar ── */
-        .sidebar {
-          width: 240px; background: #0a0f0a;
-          padding: 24px 0; display: flex; flex-direction: column;
-          transition: width 0.3s; flex-shrink: 0;
-        }
+        .sidebar { width: 240px; background: #0a0f0a; padding: 24px 0; display: flex; flex-direction: column; transition: width 0.3s; flex-shrink: 0; }
         .sidebar.collapsed { width: 64px; }
-
-        .menu-item {
-          display: flex; align-items: center; gap: 12px;
-          padding: 12px 20px; cursor: pointer; transition: all 0.15s;
-          color: #7a7570; font-size: 14px; font-weight: 400;
-          border-left: 2px solid transparent;
-        }
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; transition: all 0.15s; color: #7a7570; font-size: 14px; font-weight: 400; border-left: 2px solid transparent; }
         .menu-item:hover { color: #f0ede6; background: rgba(134,179,105,0.08); }
         .menu-item.active { color: #86b369; border-left-color: #86b369; background: rgba(134,179,105,0.08); font-weight: 500; }
         .menu-icon { font-size: 16px; flex-shrink: 0; width: 22px; text-align: center; }
-
-        /* ── Cards ── */
         .slide { transition: opacity 0.6s ease; }
-
-        .stat-card {
-          background: #fff; border-radius: 12px; padding: 20px 24px;
-          border: 1px solid rgba(0,0,0,0.06);
-          transition: transform 0.2s, box-shadow 0.2s;
-        }
+        .stat-card { background: #fff; border-radius: 12px; padding: 20px 24px; border: 1px solid rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; }
         .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-
-        .quick-card {
-          background: #fff; border-radius: 12px; padding: 20px;
-          border: 1px solid rgba(0,0,0,0.06);
-          cursor: pointer; transition: all 0.2s; text-align: center;
-        }
+        .quick-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid rgba(0,0,0,0.06); cursor: pointer; transition: all 0.2s; text-align: center; }
         .quick-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); border-color: #86b369; }
-
-        /* ── Buttons ── */
-        .logout-btn {
-          background: transparent; border: 1px solid rgba(255,100,100,0.4);
-          color: #ff7a7a; padding: 5px 12px; border-radius: 4px;
-          font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif;
-          transition: all 0.2s; white-space: nowrap;
-        }
-        .logout-btn:hover { background: rgba(255,107,107,0.12); }
-
-        .toggle-btn {
-          background: rgba(134,179,105,0.1); border: 1px solid rgba(134,179,105,0.2);
-          color: #86b369; width: 26px; height: 26px; border-radius: 5px;
-          display: flex; align-items: center; justify-content: center;
-          cursor: pointer; font-size: 12px; transition: all 0.2s; flex-shrink: 0;
-        }
-        .toggle-btn:hover { background: rgba(134,179,105,0.2); }
-
-        @media (max-width: 900px) {
-          .sidebar { display: none; }
-          .college-header { padding: 12px 16px !important; }
-          .logo-img { width: 60px !important; height: 60px !important; }
-        }
+        @media (max-width: 900px) { .sidebar { display: none; } .college-header { padding: 12px 16px !important; } }
       `}</style>
 
-      {/* ══ 1. NOTICE BAR (Only Notices) ══ */}
-<div style={{ background: '#1a2e1a', height: 36, display: 'flex', alignItems: 'center', flexShrink: 0, overflow: 'hidden' }}>
-  <div style={{ background: '#86b369', padding: '0 14px', height: '100%', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-    <span style={{ color: '#0a0f0a', fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-      Latest Notice
-    </span>
-  </div>
-  <div className="marquee-wrap">
-    <div className="marquee-track">
-      {[...notices, ...notices].map((n, i) => (
-        <span key={i} style={{ color: '#c8d8b8', fontSize: 13, fontWeight: 300 }}>{n}</span>
-      ))}
-    </div>
-  </div>
-  <div style={{ background: '#86b369', padding: '0 14px', height: '100%', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-    <span style={{ color: '#0a0f0a', fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-      Latest Notice
-    </span>
-  </div>
-</div>
+      {/* ══ 1. NOTICE BAR ══ */}
+      <div style={{ background: '#1a2e1a', height: 36, display: 'flex', alignItems: 'center', flexShrink: 0, overflow: 'hidden' }}>
+        <div style={{ background: '#86b369', padding: '0 14px', height: '100%', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+          <span style={{ color: '#0a0f0a', fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Latest Notice</span>
+        </div>
+        <div className="marquee-wrap">
+          <div className="marquee-track">
+            {[...notices, ...notices].map((n, i) => (
+              <span key={i} style={{ color: '#c8d8b8', fontSize: 13, fontWeight: 300 }}>{n}</span>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* ══ 2. COLLEGE HEADER ══ */}
       <div className="college-header" style={{ background: '#fff', padding: '16px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '3px solid #1a3a1a' }}>
-
-        {/* Left Logo */}
-        <div className="logo-img" style={{ width: 90, height: 90, borderRadius: '50%', overflow: 'hidden', border: '3px solid #2a5c2a', flexShrink: 0, background: '#f0f8ee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img
-            src="/images/hpcaa icon.png"
-            alt="HPCAA Logo"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            onError={(e) => {
-              e.target.style.display = 'none'
-              e.target.parentNode.innerHTML = '<span style="font-family:Playfair Display,serif;font-size:32px;font-weight:900;color:#1a3a1a">H</span>'
-            }}
-          />
+        <div style={{ width: 90, height: 90, borderRadius: '50%', overflow: 'hidden', border: '3px solid #2a5c2a', flexShrink: 0, background: '#f0f8ee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src="/images/hpcaa icon.png" alt="HPCAA Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            onError={(e) => { e.target.style.display = 'none'; e.target.parentNode.innerHTML = '<span style="font-family:Playfair Display,serif;font-size:32px;font-weight:900;color:#1a3a1a">H</span>' }} />
         </div>
 
-        {/* Center — Typewriter */}
         <div style={{ textAlign: 'center', flex: 1, padding: '0 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-
-          <h1
-            className="type-line1"
-            style={{
-              fontFamily: 'Playfair Display, serif',
-              fontSize: 26,
-              fontWeight: 900,
-              color: '#1a2e1a',
-              letterSpacing: 1,
-              lineHeight: 1.2,
-            }}
-          >
-            HAMDARD PUBLIC COLLEGE
-          </h1>
-
-          <h2
-            className="type-line2"
-            style={{
-              fontFamily: 'Noto Serif Bengali, serif',
-              fontSize: 21,
-              fontWeight: 700,
-              color: '#2a5c2a',
-              lineHeight: 1.3,
-            }}
-          >
-            হামদর্দ পাবলিক কলেজ
-          </h2>
-
-          <p
-            className="type-line3"
-            style={{
-              fontFamily: 'Noto Serif Bengali, serif',
-              fontSize: 13,
-              color: '#86b369',
-              fontWeight: 600,
-              letterSpacing: 0.3,
-            }}
-          >
-            অ্যালামনাই অ্যাসোসিয়েশন (HPCAA) — সংযুক্ত থাকুন, এগিয়ে যান
-          </p>
-
+          <h1 className="type-line1" style={{ fontFamily: 'Playfair Display, serif', fontSize: 26, fontWeight: 900, color: '#1a2e1a', letterSpacing: 1, lineHeight: 1.2 }}>HAMDARD PUBLIC COLLEGE</h1>
+          <h2 className="type-line2" style={{ fontFamily: 'Noto Serif Bengali, serif', fontSize: 21, fontWeight: 700, color: '#2a5c2a', lineHeight: 1.3 }}>হামদর্দ পাবলিক কলেজ</h2>
+          <p className="type-line3" style={{ fontFamily: 'Noto Serif Bengali, serif', fontSize: 13, color: '#86b369', fontWeight: 600, letterSpacing: 0.3 }}>অ্যালামনাই অ্যাসোসিয়েশন (HPCAA) — সংযুক্ত থাকুন, এগিয়ে যান</p>
         </div>
 
-        {/* Right Logo */}
-        <div className="logo-img" style={{ width: 90, height: 90, borderRadius: '50%', overflow: 'hidden', border: '3px solid #2a5c2a', flexShrink: 0, background: '#f0f8ee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img
-            src="/images/hpcaa icon.png"
-            alt="HPCAA Logo"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            onError={(e) => {
-              e.target.style.display = 'none'
-              e.target.parentNode.innerHTML = '<span style="font-size:38px">🎓</span>'
-            }}
-          />
+        <div style={{ width: 90, height: 90, borderRadius: '50%', overflow: 'hidden', border: '3px solid #2a5c2a', flexShrink: 0, background: '#f0f8ee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src="/images/hpcaa icon.png" alt="HPCAA Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            onError={(e) => { e.target.style.display = 'none'; e.target.parentNode.innerHTML = '<span style="font-size:38px">🎓</span>' }} />
+        </div>
+      </div>
+
+      {/* ══ 3. NAVBAR ══ */}
+      <div style={{ background: '#1a3a1a', display: 'flex', alignItems: 'center', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid rgba(134,179,105,0.2)' }}>
+        <div style={{ background: '#86b369', padding: '11px 18px', cursor: 'pointer', fontSize: 20, display: 'flex', alignItems: 'center', color: '#0a0f0a', borderRadius: '0 0 4px 4px' }}
+          onClick={() => setSidebarOpen(p => !p)}>☰</div>
+
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden', justifyContent: 'center' }}>
+          {navItems.map(item => (
+            <div key={item.id} className={`nav-link${activeMenu === item.id ? ' active' : ''}`}
+              onClick={() => { setActiveMenu(item.id); router.push(item.path) }}>
+              {item.label}
+            </div>
+          ))}
         </div>
 
-      </div>
-
-{/* ══ 3. NAVBAR (Updated with Menu Icon Toggle) ══ */}
-<div style={{ 
-  background: '#1a3a1a', 
-  display: 'flex', 
-  alignItems: 'center', 
-  justifyContent: 'center', 
-  position: 'sticky', 
-  top: 0, 
-  zIndex: 100, 
-  borderBottom: '1px solid rgba(134,179,105,0.2)',
-  width: '100%'
-}}>
-  <div style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '0 20px' }}>
-    
-    {/* 1. Left Section: Menu Toggle Icon */}
-    <div style={{ display: 'flex', alignItems: 'center', flex: '1 0 0' }}>
-      <div
-        style={{ 
-          background: '#86b369', 
-          padding: '11px 18px', 
-          cursor: 'pointer', 
-          fontSize: '20px', 
-          display: 'flex', 
-          alignItems: 'center',
-          color: '#0a0f0a',
-          borderRadius: '0 0 4px 4px',
-          transition: 'background 0.2s'
-        }}
-        onClick={() => setSidebarOpen(p => !p)} // এখানে ক্লিক করলেই সাইডবার টগল হবে
-        title={sidebarOpen ? "Close Sidebar" : "Open Sidebar"}
-      >
-        ☰
-      </div>
-    </div>
-
-    {/* 2. Center Section: Nav links */}
-    <div style={{ display: 'flex', justifyContent: 'center', flex: '2 0 0' }}>
-      <div style={{ display: 'flex', overflow: 'hidden' }}>
-        {navItems.map(item => (
-          <div
-            key={item.id}
-            className={`nav-link${activeMenu === item.id ? ' active' : ''}`}
-            onClick={() => { setActiveMenu(item.id); router.push(item.path) }}
-          >
-            {item.label}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px', flexShrink: 0 }}>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#f0ede6', lineHeight: 1.1 }}>{userName}</div>
+            <div style={{ fontSize: 10, color: '#86b369', textTransform: 'uppercase' }}>{session?.user?.role || 'Alumni'}</div>
           </div>
-        ))}
-      </div>
-    </div>
-
-    {/* 3. Most Right Section: User Profile & Logout */}
-    <div style={{ display: 'flex', alignItems: 'center', gap: 15, flex: '1 0 0', justifyContent: 'flex-end' }}>
-      
-      {/* User Info */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#f0ede6', lineHeight: 1.1 }}>{userName}</div>
-          <div style={{ fontSize: 10, color: '#86b369', textTransform: 'uppercase' }}>{session?.user?.role || 'Alumni'}</div>
+          <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #86b369', overflow: 'hidden', flexShrink: 0, background: '#0a0f0a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {session?.user?.image ? (
+              <img src={session.user.image} alt={userName} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                onError={(e) => { e.target.style.display = 'none'; e.target.parentNode.innerHTML = `<span style="font-family:Playfair Display,serif;font-size:14px;font-weight:700;color:#86b369">${userInitial}</span>` }} />
+            ) : (
+              <span style={{ fontFamily: 'Playfair Display, serif', fontSize: 14, fontWeight: 700, color: '#86b369' }}>{userInitial}</span>
+            )}
+          </div>
+          <button onClick={() => signOut({ callbackUrl: '/login' })}
+            style={{ background: 'rgba(255,100,100,0.12)', border: '1px solid rgba(255,100,100,0.3)', color: '#ff7a7a', padding: '6px 16px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'DM Sans, sans-serif' }}>
+            Logout
+          </button>
         </div>
-        
-{/* Profile Avatar */}
-<div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #86b369', overflow: 'hidden', flexShrink: 0, background: '#0a0f0a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-  {session?.user?.image ? (
-    <img
-      src={session.user.image}
-      alt={userName}
-      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-      onError={(e) => {
-        e.target.style.display = 'none'
-        e.target.parentNode.innerHTML = `<span style="font-family:Playfair Display,serif;font-size:14px;font-weight:700;color:#86b369">${userInitial}</span>`
-      }}
-    />
-  ) : (
-    <span style={{ fontFamily: 'Playfair Display, serif', fontSize: 14, fontWeight: 700, color: '#86b369' }}>
-      {userInitial}
-    </span>
-  )}
-</div>
       </div>
-
-      {/* Logout Button */}
-      <button 
-        onClick={() => signOut({ callbackUrl: '/login' })}
-        style={{
-          background: 'rgba(255, 100, 100, 0.12)',
-          border: '1px solid rgba(255, 100, 100, 0.3)',
-          color: '#ff7a7a',
-          padding: '6px 16px',
-          borderRadius: '6px',
-          fontSize: '12px',
-          fontWeight: '600',
-          cursor: 'pointer',
-          transition: 'all 0.2s',
-          whiteSpace: 'nowrap'
-        }}
-        onMouseOver={(e) => e.target.style.background = 'rgba(255, 100, 100, 0.25)'}
-        onMouseOut={(e) => e.target.style.background = 'rgba(255, 100, 100, 0.12)'}
-      >
-        Logout
-      </button>
-    </div>
-
-  </div>
-</div>
 
       {/* ══ 4. BODY ══ */}
       <div style={{ display: 'flex', flex: 1 }}>
@@ -421,12 +188,9 @@ export default function DashboardPage() {
             {sidebarOpen && <p style={{ fontSize: 10, color: '#4a4845', letterSpacing: 1.5, textTransform: 'uppercase' }}>Navigation</p>}
           </div>
           {menuItems.map(item => (
-            <div
-              key={item.id}
-              className={`menu-item${activeMenu === item.id ? ' active' : ''}`}
+            <div key={item.id} className={`menu-item${activeMenu === item.id ? ' active' : ''}`}
               onClick={() => { setActiveMenu(item.id); router.push(item.path) }}
-              title={!sidebarOpen ? item.label : ''}
-            >
+              title={!sidebarOpen ? item.label : ''}>
               <span className="menu-icon">{item.icon}</span>
               {sidebarOpen && <span>{item.label}</span>}
             </div>
@@ -455,11 +219,7 @@ export default function DashboardPage() {
           {/* Slider */}
           <div style={{ borderRadius: 14, overflow: 'hidden', marginBottom: 28, position: 'relative', height: 210 }}>
             {slides.map((slide, i) => (
-              <div
-                key={i}
-                className="slide"
-                style={{ position: 'absolute', inset: 0, background: slide.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', opacity: currentSlide === i ? 1 : 0, pointerEvents: currentSlide === i ? 'auto' : 'none', padding: 40, textAlign: 'center' }}
-              >
+              <div key={i} className="slide" style={{ position: 'absolute', inset: 0, background: slide.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', opacity: currentSlide === i ? 1 : 0, pointerEvents: currentSlide === i ? 'auto' : 'none', padding: 40, textAlign: 'center' }}>
                 <div style={{ fontSize: 46, marginBottom: 12 }}>{slide.icon}</div>
                 <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 700, color: '#f0ede6', marginBottom: 8 }}>{slide.title}</h3>
                 <p style={{ fontSize: 14, color: 'rgba(240,237,230,0.6)', fontWeight: 300 }}>{slide.sub}</p>
@@ -492,14 +252,10 @@ export default function DashboardPage() {
 
           {/* Profile + Quick Links */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-
-            {/* Profile Card */}
             <div style={{ background: '#1a2e1a', borderRadius: 16, padding: 28, position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: -40, right: -40, width: 150, height: 150, background: 'radial-gradient(circle, rgba(134,179,105,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-                <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#0a0f0a', border: '2px solid #86b369', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 700, color: '#86b369', flexShrink: 0 }}>
-                  {userInitial}
-                </div>
+                <div style={{ width: 52, height: 52, borderRadius: '50%', background: '#0a0f0a', border: '2px solid #86b369', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Playfair Display, serif', fontSize: 22, fontWeight: 700, color: '#86b369', flexShrink: 0 }}>{userInitial}</div>
                 <div>
                   <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 18, fontWeight: 700, color: '#f0ede6' }}>{userName}</div>
                   <div style={{ fontSize: 12, color: '#86b369', textTransform: 'capitalize' }}>{session?.user?.role || 'alumni'}</div>
@@ -517,15 +273,12 @@ export default function DashboardPage() {
                   </span>
                 </div>
               </div>
-              <button
-                onClick={() => router.push('/dashboard/profile')}
-                style={{ marginTop: 20, padding: '9px 20px', background: 'rgba(134,179,105,0.15)', border: '1px solid rgba(134,179,105,0.3)', borderRadius: 7, color: '#86b369', fontSize: 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}
-              >
+              <button onClick={() => router.push('/dashboard/profile')}
+                style={{ marginTop: 20, padding: '9px 20px', background: 'rgba(134,179,105,0.15)', border: '1px solid rgba(134,179,105,0.3)', borderRadius: 7, color: '#86b369', fontSize: 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
                 Profile দেখো →
               </button>
             </div>
 
-            {/* Quick Links */}
             <div>
               <h3 style={{ fontSize: 12, color: '#888', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 }}>Quick Access</h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -542,8 +295,8 @@ export default function DashboardPage() {
                 ))}
               </div>
             </div>
-
           </div>
+
         </div>
       </div>
     </div>
