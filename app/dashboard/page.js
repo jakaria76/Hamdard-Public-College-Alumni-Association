@@ -129,7 +129,7 @@ export default function DashboardPage() {
       {/* ══ 2. COLLEGE HEADER ══ */}
       <div className="college-header" style={{ background: '#fff', padding: '16px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '3px solid #1a3a1a' }}>
         <div style={{ width: 90, height: 90, borderRadius: '50%', overflow: 'hidden', border: '3px solid #2a5c2a', flexShrink: 0, background: '#f0f8ee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img src="/images/hpcaa icon.png" alt="HPCAA Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          <img src="/images/hpcaa-icon.png" alt="HPCAA Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             onError={(e) => { e.target.style.display = 'none'; e.target.parentNode.innerHTML = '<span style="font-family:Playfair Display,serif;font-size:32px;font-weight:900;color:#1a3a1a">H</span>' }} />
         </div>
 
@@ -140,7 +140,7 @@ export default function DashboardPage() {
         </div>
 
         <div style={{ width: 90, height: 90, borderRadius: '50%', overflow: 'hidden', border: '3px solid #2a5c2a', flexShrink: 0, background: '#f0f8ee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img src="/images/hpcaa icon.png" alt="HPCAA Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          <img src="/images/hpcaa-icon.png" alt="HPCAA Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             onError={(e) => { e.target.style.display = 'none'; e.target.parentNode.innerHTML = '<span style="font-size:38px">🎓</span>' }} />
         </div>
       </div>
