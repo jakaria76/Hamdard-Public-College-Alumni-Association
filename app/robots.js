@@ -4,31 +4,11 @@ export default function robots() {
   return {
     rules: [
       {
-        // সব bots এর জন্য
         userAgent: '*',
         allow: '/',
-        disallow: [
-          '/dashboard',
-          '/dashboard/',
-          '/admin',
-          '/admin/',
-          '/api',
-          '/api/',
-          '/forgot-password',
-        ],
-      },
-      {
-        // Google bot আলাদাভাবে
-        userAgent: 'Googlebot',
-        allow: '/',
-        disallow: [
-          '/dashboard',
-          '/admin',
-          '/api',
-        ],
+        disallow: ['/dashboard', '/admin', '/api', '/forgot-password'],
       },
     ],
     sitemap: `${BASE_URL}/sitemap.xml`,
-    host: BASE_URL,
   }
 }
