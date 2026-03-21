@@ -438,11 +438,11 @@ export default function Home() {
           <div>
             <div className="hero-badge">Since 1975 — Hamdard Public College</div>
             <h1 className="hero-title">
-              Alumni-দের জন্য একটি <em>বিশেষ</em> জায়গা
+              Hpc Alumni-দের জন্য একটি <em>বিশেষ</em> জায়গা hpcaa
             </h1>
             <p className="hero-desc">
-              প্রাক্তন শিক্ষার্থীদের সাথে সংযুক্ত হোন। সুযোগ ভাগ করুন।
-              একসাথে আরও শক্তিশালী হই।
+              hpcaa প্রাক্তন শিক্ষার্থীদের সাথে সংযুক্ত হোন। hpcaa সুযোগ ভাগ করুন।
+              একসাথে আরও শক্তিশালী হই। hpcaa
             </p>
             <div className="hero-buttons">
               <Link href="/register" className="btn-primary">Join Now — Register করো</Link>
