@@ -436,7 +436,7 @@ export default function Home() {
         {/* Hero */}
         <section className="hero">
           <div>
-            <div className="hero-badge">Since 1975 — Hamdard Public College</div>
+            <div className="hero-badge">Since 2010 — Hamdard Public College Alumni Association(HPCAA)</div>
             <h1 className="hero-title">
               Hpc Alumni-দের জন্য একটি <em>বিশেষ</em> জায়গা hpcaa
             </h1>
