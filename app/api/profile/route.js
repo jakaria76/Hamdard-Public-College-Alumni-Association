@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import connectDB from '@/lib/db'
-import Profile from '@/models/Profile'
 import { auth } from '@/lib/auth'
 import { v2 as cloudinary } from 'cloudinary'
+import mongoose from 'mongoose'
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -10,7 +10,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
-// String fields
 const STRING_FIELDS = [
   'fullName', 'fullNameBn', 'memberType', 'committeePosition', 'gender',
   'alternativeMobile', 'presentAddress', 'permanentAddress', 'district',
@@ -21,16 +20,24 @@ const STRING_FIELDS = [
   'hobbies', 'facebook', 'portfolioWebsite', 'locationDms',
 ]
 
-// Number fields
 const NUMBER_FIELDS = [
   'schoolPassingYear', 'collegePassingYear', 'currentYear',
   'currentSemester', 'totalDonationCount', 'latitude', 'longitude',
 ]
 
-// Date fields
 const DATE_FIELDS = [
   'memberSince', 'dateOfBirth', 'lastDonationDate', 'nextAvailableDonationDate',
 ]
+
+// Profile model — safe get করো
+async function getProfileModel() {
+  await connectDB()
+  if (mongoose.models.Profile) {
+    return mongoose.models.Profile
+  }
+  const { default: Profile } = await import('@/models/Profile')
+  return Profile
+}
 
 async function uploadImage(imageFile) {
   try {
@@ -43,7 +50,7 @@ async function uploadImage(imageFile) {
     })
     return result.secure_url
   } catch (err) {
-    console.error('Cloudinary upload error:', err)
+    console.error('Cloudinary error:', err)
     throw new Error('Image upload failed')
   }
 }
@@ -53,14 +60,14 @@ function parseFormData(formData) {
 
   STRING_FIELDS.forEach(field => {
     const value = formData.get(field)
-    if (value !== null && value !== '' && value !== 'undefined') {
+    if (value && value !== '' && value !== 'undefined' && value !== 'null') {
       data[field] = value
     }
   })
 
   NUMBER_FIELDS.forEach(field => {
     const value = formData.get(field)
-    if (value !== null && value !== '' && value !== 'undefined') {
+    if (value && value !== '' && value !== 'undefined') {
       const num = Number(value)
       if (!isNaN(num)) data[field] = num
     }
@@ -68,7 +75,7 @@ function parseFormData(formData) {
 
   DATE_FIELDS.forEach(field => {
     const value = formData.get(field)
-    if (value !== null && value !== '' && value !== 'undefined') {
+    if (value && value !== '' && value !== 'undefined') {
       const date = new Date(value)
       if (!isNaN(date.getTime())) data[field] = date
     }
@@ -85,10 +92,10 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    await connectDB()
+    const Profile = await getProfileModel()
     const profile = await Profile.findOne({ userId: session.user.id }).lean()
-    return NextResponse.json({ profile }, { status: 200 })
 
+    return NextResponse.json({ profile }, { status: 200 })
   } catch (error) {
     console.error('GET profile error:', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
@@ -103,13 +110,12 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    await connectDB()
+    const Profile = await getProfileModel()
 
-    // Already exists check
     const existing = await Profile.findOne({ userId: session.user.id })
     if (existing) {
       return NextResponse.json(
-        { error: 'Profile আগেই আছে। Edit করতে যাও।' },
+        { error: 'Profile আগেই আছে। Edit করো।' },
         { status: 400 }
       )
     }
@@ -117,7 +123,6 @@ export async function POST(request) {
     const formData = await request.formData()
     const data = parseFormData(formData)
 
-    // Image upload
     const imageFile = formData.get('imageFile')
     if (imageFile && imageFile.size > 0) {
       data.profileImagePath = await uploadImage(imageFile)
@@ -132,7 +137,6 @@ export async function POST(request) {
       { message: 'Profile তৈরি সফল!', profile },
       { status: 201 }
     )
-
   } catch (error) {
     console.error('POST profile error:', error.message)
     return NextResponse.json(
@@ -150,12 +154,10 @@ export async function PUT(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    await connectDB()
-
+    const Profile = await getProfileModel()
     const formData = await request.formData()
     const data = parseFormData(formData)
 
-    // Image upload
     const imageFile = formData.get('imageFile')
     if (imageFile && imageFile.size > 0) {
       data.profileImagePath = await uploadImage(imageFile)
@@ -171,7 +173,6 @@ export async function PUT(request) {
       { message: 'Profile update সফল!', profile },
       { status: 200 }
     )
-
   } catch (error) {
     console.error('PUT profile error:', error.message)
     return NextResponse.json(
@@ -189,14 +190,13 @@ export async function DELETE() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    await connectDB()
+    const Profile = await getProfileModel()
     await Profile.findOneAndDelete({ userId: session.user.id })
 
     return NextResponse.json(
       { message: 'Profile delete সফল!' },
       { status: 200 }
     )
-
   } catch (error) {
     console.error('DELETE profile error:', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
