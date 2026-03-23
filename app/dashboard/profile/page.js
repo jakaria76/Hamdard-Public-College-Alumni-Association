@@ -142,23 +142,23 @@ export default function ProfileViewPage() {
         .glass:hover{border-color:rgba(134,179,105,0.18);box-shadow:0 8px 32px rgba(0,0,0,0.25)}
 
         /* Cover */
-        .cover{height:220px;background:linear-gradient(155deg,#060f06 0%,#0d1a0d 30%,#152815 55%,#1e3d1e 75%,#0d1a0d 100%);position:relative;overflow:hidden}
+        .cover{height:320px;background:linear-gradient(155deg,#060f06 0%,#0d1a0d 30%,#152815 55%,#1e3d1e 75%,#0d1a0d 100%);position:relative;overflow:hidden}
         .cover::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 20% 40%,rgba(134,179,105,0.2) 0%,transparent 60%),radial-gradient(ellipse 40% 50% at 85% 15%,rgba(134,179,105,0.1) 0%,transparent 50%),radial-gradient(ellipse 25% 35% at 65% 80%,rgba(134,179,105,0.06) 0%,transparent 50%)}
         .cover::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(-52deg,transparent,transparent 38px,rgba(134,179,105,0.02) 38px,rgba(134,179,105,0.02) 39px)}
-        .cover-tag{position:absolute;bottom:18px;right:22px;z-index:2;font-family:'Cormorant Garamond',serif;font-size:10px;color:rgba(134,179,105,0.35);letter-spacing:4px;text-transform:uppercase}
+        .cover-tag{position:absolute;bottom:18px;right:22px;z-index:10;font-family:'Cormorant Garamond',serif;font-size:10px;color:rgba(134,179,105,0.35);letter-spacing:4px;text-transform:uppercase}
 
         /* Avatar — now BIGGER, overlapping more */
-        .av{
-          position:absolute;bottom:-70px;left:24px;z-index:10;
-          width:140px;height:140px;border-radius:50%;
-          border:5px solid #060f06;
-          background:linear-gradient(135deg,#1a3a1a,#0a1a0a);
-          display:flex;align-items:center;justify-content:center;
-          overflow:hidden;
-          box-shadow:0 0 0 2px rgba(134,179,105,0.3),0 16px 40px rgba(0,0,0,0.6);
-          cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;
-        }
-        .av:hover{transform:scale(1.04);box-shadow:0 0 0 3px rgba(134,179,105,0.5),0 20px 48px rgba(0,0,0,0.7)}
+        /* Avatar — full cover center */
+.av{
+  position:absolute;inset:0;z-index:5;
+  width:100%;height:100%;
+  border-radius:0;border:none;
+  background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  cursor:pointer;transition:opacity 0.2s;
+}
+.av:hover{opacity:0.92}
 
         /* Avatar full screen overlay */
         .av-overlay{
@@ -211,9 +211,9 @@ export default function ProfileViewPage() {
         .empty-ico{width:80px;height:80px;border-radius:50%;background:rgba(134,179,105,0.06);border:2px dashed rgba(134,179,105,0.2);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 20px}
 
         @media(max-width:600px){
-          .cover{height:180px}
+          .cover{height:260px}
           .av{width:110px;height:110px;bottom:-55px;left:18px;border-width:4px}
-          .hero-pad{padding:68px 18px 22px !important}
+          .hero-pad{padding:18px 18px 22px !important}
           .h1-size{font-size:22px !important}
           .mp{padding:16px !important}
         }
@@ -261,7 +261,7 @@ export default function ProfileViewPage() {
             {/* Avatar — clickable for full view */}
             <div className="av" onClick={() => avatar && setAvatarFull(true)}>
               {avatar
-                ? <img src={avatar} alt={userName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ? <img src={avatar} alt={userName} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }} />
                 : <span style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 44, fontWeight: 700, color: '#86b369' }}>{initials}</span>
               }
               {/* Click hint overlay */}
@@ -277,7 +277,7 @@ export default function ProfileViewPage() {
             </div>
           </div>
 
-          <div className="hero-pad" style={{ padding: '88px 24px 26px' }}>
+          <div className="hero-pad" style={{ padding: '24px 24px 26px' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <h1 className="h1-size" style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 30, fontWeight: 700, color: '#f0ede6', marginBottom: 4, lineHeight: 1.2 }}>
