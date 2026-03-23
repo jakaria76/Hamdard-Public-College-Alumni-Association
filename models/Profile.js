@@ -2,11 +2,13 @@ import mongoose from 'mongoose'
 
 const ProfileSchema = new mongoose.Schema(
   {
+    // ← String type — ObjectId এর বদলে
+    // Google UUID এবং MongoDB ObjectId দুটোই handle করবে
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      type: String,
       required: true,
       unique: true,
+      index: true,
     },
 
     // ── BASIC ──
@@ -83,13 +85,7 @@ const ProfileSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
-// Model cache — hot reload এ duplicate model error ঠেকাবে
-let Profile
-
-try {
-  Profile = mongoose.model('Profile')
-} catch {
-  Profile = mongoose.model('Profile', ProfileSchema)
-}
+const Profile =
+  mongoose.models.Profile || mongoose.model('Profile', ProfileSchema)
 
 export default Profile
