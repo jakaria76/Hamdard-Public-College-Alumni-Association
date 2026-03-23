@@ -192,6 +192,9 @@ export default function ProfileViewPage() {
         .empty{text-align:center;padding:60px 28px}
         .empty-ico{width:80px;height:80px;border-radius:50%;background:rgba(134,179,105,0.06);border:2px dashed rgba(134,179,105,0.2);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 20px}
 
+        /* Leaflet custom marker */
+        .cm{width:16px;height:16px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#86b369;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.5)}
+
         @media(max-width:600px){
           .cover{height:160px}
           .av{width:90px;height:90px;bottom:-45px;left:16px}
@@ -310,7 +313,7 @@ export default function ProfileViewPage() {
             {profile?.shortBio && (
               <div style={{ marginTop: 18, padding: '13px 16px', background: 'rgba(134,179,105,0.05)', borderRadius: 11, borderLeft: '3px solid rgba(134,179,105,0.35)' }}>
                 <p style={{ fontSize: 13, color: 'rgba(232,228,219,0.75)', lineHeight: 1.85, fontStyle: 'italic', fontFamily: 'Cormorant Garamond, serif' }}>
-                  &ldquo;{profile.shortBio}&rdquo;
+                  “{profile.shortBio}”
                 </p>
               </div>
             )}
@@ -373,9 +376,69 @@ export default function ProfileViewPage() {
                     <Row label="Alt. Mobile" value={profile.alternativeMobile} />
                     <Row label="WhatsApp" value={profile.whatsAppNumber} />
                   </div>
+
+                  {/* 📍 Updated Location Section with Leaflet Map */}
                   {profile.latitude && profile.longitude && (
-                    <div style={{ marginTop: 14 }}>
-                      <a href={`https://maps.google.com/?q=${profile.latitude},${profile.longitude}`} target="_blank" rel="noreferrer" className="sl">🗺️ Google Maps</a>
+                    <div style={{ marginTop: 16 }}>
+                      {/* Coords info & Map Link */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, padding: '8px 12px', background: 'rgba(134,179,105,0.06)', borderRadius: 10, border: '1px solid rgba(134,179,105,0.12)' }}>
+                        <span style={{ fontSize: 16 }}>📍</span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 12, color: '#86b369', fontWeight: 600 }}>Location</div>
+                          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
+                            {Number(profile.latitude).toFixed(6)}, {Number(profile.longitude).toFixed(6)}
+                          </div>
+                          {profile.locationDms && (
+                            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>{profile.locationDms}</div>
+                          )}
+                        </div>
+                        <a 
+                          href={`https://www.google.com/maps?q=${profile.latitude},${profile.longitude}`} 
+                          target="_blank" rel="noreferrer" 
+                          className="sl"
+                          style={{ flexShrink: 0, fontSize: 12, padding: '6px 12px' }}
+                        >
+                          🗺️ Google Maps
+                        </a>
+                      </div>
+
+                      {/* Leaflet Map Frame */}
+                      <div style={{ borderRadius: 14, overflow: 'hidden', border: '1.5px solid rgba(134,179,105,0.18)' }}>
+                        <iframe
+                          srcDoc={`<!DOCTYPE html>
+                          <html>
+                          <head>
+                          <meta name="viewport" content="width=device-width,initial-scale=1">
+                          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+                          <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"><\/script>
+                          <style>
+                            *{margin:0;padding:0;box-sizing:border-box}
+                            html,body,#map{width:100%;height:100%;background:#060f06}
+                            .cm{width:16px;height:16px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#86b369;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.5)}
+                            .leaflet-popup-content-wrapper{background:#0d1a0d;border:1px solid rgba(134,179,105,0.3);border-radius:10px;color:#e8e4db;font-family:sans-serif}
+                            .leaflet-popup-tip{background:#0d1a0d}
+                            .leaflet-popup-content{font-size:12px;line-height:1.6;color:#c8dba8;margin:8px 12px}
+                            .leaflet-tile{filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);}
+                          </style>
+                          </head>
+                          <body>
+                          <div id="map"></div>
+                          <script>
+                            const lat = ${profile.latitude};
+                            const lng = ${profile.longitude};
+                            const map = L.map('map', { zoomControl: true, dragging: true, scrollWheelZoom: false }).setView([lat, lng], 15);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                            const icon = L.divIcon({ className: '', html: '<div class="cm"></div>', iconSize: [16, 16], iconAnchor: [8, 16], popupAnchor: [0, -18] });
+                            L.marker([lat, lng], { icon }).addTo(map).bindPopup('<b>📍 Location</b><br>' + lat.toFixed(6) + ', ' + lng.toFixed(6)).openPopup();
+                          <\/script>
+                          </body>
+                          </html>`}
+                          width="100%"
+                          height="240"
+                          style={{ display: 'block', border: 'none' }}
+                          title="Profile Location Map"
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -415,7 +478,6 @@ export default function ProfileViewPage() {
               <div className="glass a3" style={{ padding: '20px 20px', animation: 'si 0.3s ease both' }}>
                 <SH icon="🩸" title="Blood Information" />
 
-                {/* Hero blood card */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 20, padding: '18px', background: 'linear-gradient(135deg,rgba(220,38,38,0.07),rgba(127,29,29,0.04))', borderRadius: 14, border: '1px solid rgba(220,38,38,0.14)', marginBottom: 18 }}>
                   {profile.bloodGroup
                     ? <div className="bc">{profile.bloodGroup}</div>
@@ -436,7 +498,6 @@ export default function ProfileViewPage() {
                   </div>
                 </div>
 
-                {/* Stat tiles */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 4 }}>
                   <div className="tile">
                     <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 6 }}>Total Donations</div>
