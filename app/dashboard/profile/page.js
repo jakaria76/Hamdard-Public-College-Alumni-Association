@@ -10,6 +10,7 @@ export default function ProfileViewPage() {
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState('info')
+  const [avatarFull, setAvatarFull] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') { window.location.href = '/login'; return }
@@ -67,150 +68,172 @@ export default function ProfileViewPage() {
     { id: 'bio', label: 'Bio', icon: '✍️' },
   ]
 
+  const mapHtml = (lat, lng) => `<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"><\/script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body,#map{width:100%;height:100%}
+  .pulse-wrap{position:relative;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+  .pulse{position:absolute;width:32px;height:32px;border-radius:50%;background:rgba(134,179,105,0.25);animation:pulse 1.8s ease-out infinite}
+  .pulse2{position:absolute;width:20px;height:20px;border-radius:50%;background:rgba(134,179,105,0.35);animation:pulse 1.8s ease-out 0.4s infinite}
+  .dot{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#86b369,#4a7c4a);border:3px solid #fff;box-shadow:0 2px 12px rgba(134,179,105,0.8);position:relative;z-index:2}
+  @keyframes pulse{0%{transform:scale(0.5);opacity:0.8}100%{transform:scale(2.2);opacity:0}}
+  .leaflet-popup-content-wrapper{background:rgba(6,20,6,0.95);border:1px solid rgba(134,179,105,0.4);border-radius:12px;color:#e8e4db;backdrop-filter:blur(10px);box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+  .leaflet-popup-tip{background:rgba(6,20,6,0.95)}
+  .leaflet-popup-content{font-size:12px;line-height:1.7;color:#c8dba8;margin:10px 14px;font-family:sans-serif}
+  .leaflet-control-zoom a{background:rgba(6,20,6,0.9)!important;color:#86b369!important;border-color:rgba(134,179,105,0.3)!important}
+  .leaflet-control-zoom a:hover{background:rgba(134,179,105,0.15)!important}
+  .leaflet-control-attribution{display:none}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+  const lat=${lat}, lng=${lng};
+  const map=L.map('map',{zoomControl:true,dragging:true,scrollWheelZoom:false,attributionControl:false}).setView([lat,lng],15);
+
+  // Colorful tile layer — Stadia Alidade Smooth (colorful)
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+
+  const icon=L.divIcon({
+    className:'',
+    html:'<div class="pulse-wrap"><div class="pulse"></div><div class="pulse2"></div><div class="dot"></div></div>',
+    iconSize:[32,32],
+    iconAnchor:[16,16],
+    popupAnchor:[0,-20],
+  });
+
+  L.marker([lat,lng],{icon}).addTo(map)
+    .bindPopup('<div style="font-weight:700;color:#86b369;margin-bottom:4px">📍 Location</div><div>' + lat.toFixed(6) + '</div><div>' + lng.toFixed(6) + '</div>')
+    .openPopup();
+
+  // Circle highlight
+  L.circle([lat,lng],{
+    color:'rgba(134,179,105,0.4)',
+    fillColor:'rgba(134,179,105,0.08)',
+    fillOpacity:1,
+    weight:1.5,
+    radius:80,
+  }).addTo(map);
+<\/script>
+</body>
+</html>`
+
   return (
     <div style={{ minHeight: '100vh', background: '#060f06', color: '#e8e4db', fontFamily: "'Outfit', system-ui, sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&family=Noto+Serif+Bengali:wght@500;600&display=swap');
         *{box-sizing:border-box;margin:0;padding:0}
-
         @keyframes sp{to{transform:rotate(360deg)}}
         @keyframes fu{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
         @keyframes si{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:translateX(0)}}
-        @keyframes bg{from{width:0}to{width:var(--w)}}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
         .a1{animation:fu 0.5s ease 0.05s both}
         .a2{animation:fu 0.5s ease 0.15s both}
         .a3{animation:fu 0.5s ease 0.25s both}
         .a4{animation:fu 0.5s ease 0.35s both}
 
-        .glass{
-          background:rgba(255,255,255,0.028);
-          border:1px solid rgba(255,255,255,0.07);
-          border-radius:18px;
-          transition:border-color 0.25s,box-shadow 0.25s;
-        }
+        .glass{background:rgba(255,255,255,0.028);border:1px solid rgba(255,255,255,0.07);border-radius:18px;transition:border-color 0.25s,box-shadow 0.25s}
         .glass:hover{border-color:rgba(134,179,105,0.18);box-shadow:0 8px 32px rgba(0,0,0,0.25)}
 
         /* Cover */
-        .cover{
-          height:190px;
-          background:linear-gradient(155deg,#060f06 0%,#0d1a0d 30%,#152815 55%,#1e3d1e 75%,#0d1a0d 100%);
-          position:relative;overflow:hidden;
-        }
-        .cover::before{
-          content:'';position:absolute;inset:0;
-          background:
-            radial-gradient(ellipse 60% 80% at 20% 40%,rgba(134,179,105,0.2) 0%,transparent 60%),
-            radial-gradient(ellipse 40% 50% at 85% 15%,rgba(134,179,105,0.1) 0%,transparent 50%),
-            radial-gradient(ellipse 25% 35% at 65% 80%,rgba(134,179,105,0.06) 0%,transparent 50%);
-        }
-        .cover::after{
-          content:'';position:absolute;inset:0;
-          background:repeating-linear-gradient(-52deg,transparent,transparent 38px,rgba(134,179,105,0.02) 38px,rgba(134,179,105,0.02) 39px);
-        }
-        .cover-tag{
-          position:absolute;bottom:18px;right:22px;z-index:2;
-          font-family:'Cormorant Garamond',serif;font-size:10px;
-          color:rgba(134,179,105,0.35);letter-spacing:4px;text-transform:uppercase;
-        }
+        .cover{height:220px;background:linear-gradient(155deg,#060f06 0%,#0d1a0d 30%,#152815 55%,#1e3d1e 75%,#0d1a0d 100%);position:relative;overflow:hidden}
+        .cover::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 20% 40%,rgba(134,179,105,0.2) 0%,transparent 60%),radial-gradient(ellipse 40% 50% at 85% 15%,rgba(134,179,105,0.1) 0%,transparent 50%),radial-gradient(ellipse 25% 35% at 65% 80%,rgba(134,179,105,0.06) 0%,transparent 50%)}
+        .cover::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(-52deg,transparent,transparent 38px,rgba(134,179,105,0.02) 38px,rgba(134,179,105,0.02) 39px)}
+        .cover-tag{position:absolute;bottom:18px;right:22px;z-index:2;font-family:'Cormorant Garamond',serif;font-size:10px;color:rgba(134,179,105,0.35);letter-spacing:4px;text-transform:uppercase}
 
-        /* Avatar */
+        /* Avatar — now BIGGER, overlapping more */
         .av{
-          position:absolute;bottom:-58px;left:22px;z-index:10;
-          width:116px;height:116px;border-radius:50%;
-          border:4px solid #060f06;
+          position:absolute;bottom:-70px;left:24px;z-index:10;
+          width:140px;height:140px;border-radius:50%;
+          border:5px solid #060f06;
           background:linear-gradient(135deg,#1a3a1a,#0a1a0a);
           display:flex;align-items:center;justify-content:center;
           overflow:hidden;
-          box-shadow:0 0 0 2px rgba(134,179,105,0.25),0 14px 36px rgba(0,0,0,0.55);
+          box-shadow:0 0 0 2px rgba(134,179,105,0.3),0 16px 40px rgba(0,0,0,0.6);
+          cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;
         }
+        .av:hover{transform:scale(1.04);box-shadow:0 0 0 3px rgba(134,179,105,0.5),0 20px 48px rgba(0,0,0,0.7)}
+
+        /* Avatar full screen overlay */
+        .av-overlay{
+          position:fixed;inset:0;z-index:999;
+          background:rgba(0,0,0,0.92);
+          display:flex;align-items:center;justify-content:center;
+          animation:fadeIn 0.2s ease;
+          cursor:pointer;
+          backdrop-filter:blur(8px);
+        }
+        .av-overlay img{
+          max-width:90vw;max-height:90vh;
+          border-radius:16px;
+          box-shadow:0 0 0 2px rgba(134,179,105,0.3),0 32px 80px rgba(0,0,0,0.8);
+          object-fit:contain;
+        }
+        .av-close{
+          position:absolute;top:20px;right:24px;
+          width:40px;height:40px;border-radius:50%;
+          background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
+          color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;
+          cursor:pointer;transition:all 0.2s;
+        }
+        .av-close:hover{background:rgba(220,38,38,0.3);border-color:rgba(220,38,38,0.5)}
 
         /* Tab */
         .tab-bar{display:flex;gap:3px;overflow-x:auto;scrollbar-width:none}
         .tab-bar::-webkit-scrollbar{display:none}
-        .tb{
-          flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;
-          padding:9px 16px;border:1.5px solid transparent;border-radius:12px;
-          cursor:pointer;background:transparent;
-          color:rgba(255,255,255,0.25);font-family:'Outfit',sans-serif;
-          font-size:10px;font-weight:600;letter-spacing:0.4px;transition:all 0.18s;
-        }
+        .tb{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 16px;border:1.5px solid transparent;border-radius:12px;cursor:pointer;background:transparent;color:rgba(255,255,255,0.25);font-family:'Outfit',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.4px;transition:all 0.18s}
         .tb.on{background:rgba(134,179,105,0.1);border-color:rgba(134,179,105,0.2);color:#86b369}
         .tb:hover:not(.on){background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5)}
         .tb-i{font-size:17px}
 
-        /* Badge */
         .bdg{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.2px}
 
-        /* Social link */
-        .sl{
-          display:inline-flex;align-items:center;gap:7px;
-          padding:9px 16px;border-radius:10px;text-decoration:none;
-          border:1px solid rgba(255,255,255,0.09);color:rgba(255,255,255,0.5);
-          background:rgba(255,255,255,0.028);font-size:13px;
-          transition:all 0.18s;white-space:nowrap;
-        }
+        .sl{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:10px;text-decoration:none;border:1px solid rgba(255,255,255,0.09);color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.028);font-size:13px;transition:all 0.18s;white-space:nowrap}
         .sl:hover{border-color:rgba(134,179,105,0.45);color:#86b369;background:rgba(134,179,105,0.06);transform:translateY(-1px)}
 
-        /* Blood circle */
-        .bc{
-          width:70px;height:70px;border-radius:50%;flex-shrink:0;
-          background:linear-gradient(135deg,#dc2626,#7f1d1d);
-          display:flex;align-items:center;justify-content:center;
-          font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#fff;
-          box-shadow:0 8px 24px rgba(220,38,38,0.35);border:2px solid rgba(220,38,38,0.25);
-        }
+        .bc{width:70px;height:70px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#dc2626,#7f1d1d);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#fff;box-shadow:0 8px 24px rgba(220,38,38,0.35);border:2px solid rgba(220,38,38,0.25)}
 
-        /* Completion ring */
         .ring{position:relative;width:68px;height:68px;flex-shrink:0}
-
-        /* Btn */
-        .be{
-          display:inline-flex;align-items:center;gap:7px;
-          padding:10px 20px;
-          background:linear-gradient(135deg,#2a4d2a,#1a3a1a);
-          color:#c8e6a8;border:1px solid rgba(134,179,105,0.25);
-          border-radius:11px;font-size:12px;font-weight:600;cursor:pointer;
-          font-family:'Outfit',sans-serif;transition:all 0.2s;
-        }
-        .be:hover{background:linear-gradient(135deg,#3a6d3a,#2a4d2a);transform:translateY(-1px);box-shadow:0 6px 18px rgba(134,179,105,0.18)}
-
-        .bd{
-          display:inline-flex;align-items:center;gap:6px;
-          padding:10px 14px;
-          background:rgba(220,38,38,0.07);color:#f87171;
-          border:1px solid rgba(220,38,38,0.18);
-          border-radius:11px;font-size:12px;cursor:pointer;
-          font-family:'Outfit',sans-serif;transition:all 0.2s;
-        }
-        .bd:hover{background:rgba(220,38,38,0.14);border-color:rgba(220,38,38,0.35)}
-
-        /* Stat tile */
         .tile{background:rgba(255,255,255,0.03);border-radius:12px;padding:14px 16px;border:1px solid rgba(255,255,255,0.055)}
 
-        /* Empty */
+        .be{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:linear-gradient(135deg,#2a4d2a,#1a3a1a);color:#c8e6a8;border:1px solid rgba(134,179,105,0.25);border-radius:11px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:all 0.2s}
+        .be:hover{background:linear-gradient(135deg,#3a6d3a,#2a4d2a);transform:translateY(-1px);box-shadow:0 6px 18px rgba(134,179,105,0.18)}
+        .bd{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;background:rgba(220,38,38,0.07);color:#f87171;border:1px solid rgba(220,38,38,0.18);border-radius:11px;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all 0.2s}
+        .bd:hover{background:rgba(220,38,38,0.14);border-color:rgba(220,38,38,0.35)}
+
         .empty{text-align:center;padding:60px 28px}
         .empty-ico{width:80px;height:80px;border-radius:50%;background:rgba(134,179,105,0.06);border:2px dashed rgba(134,179,105,0.2);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 20px}
 
-        /* Leaflet custom marker */
-        .cm{width:16px;height:16px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#86b369;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.5)}
-
         @media(max-width:600px){
-          .cover{height:160px}
-          .av{width:90px;height:90px;bottom:-45px;left:16px}
-          .hero-pad{padding:58px 18px 22px !important}
+          .cover{height:180px}
+          .av{width:110px;height:110px;bottom:-55px;left:18px;border-width:4px}
+          .hero-pad{padding:68px 18px 22px !important}
           .h1-size{font-size:22px !important}
           .mp{padding:16px !important}
         }
       `}</style>
 
-      {/* ── Sticky Nav ── */}
+      {/* Avatar full screen */}
+      {avatarFull && avatar && (
+        <div className="av-overlay" onClick={() => setAvatarFull(false)}>
+          <div className="av-close" onClick={() => setAvatarFull(false)}>✕</div>
+          <img src={avatar} alt={userName} onClick={e => e.stopPropagation()} />
+        </div>
+      )}
+
+      {/* Sticky Nav */}
       <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(6,15,6,0.94)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(134,179,105,0.09)', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <button onClick={() => router.push('/dashboard')}
           style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'transparent', border: 'none', color: 'rgba(134,179,105,0.65)', fontSize: 13, cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontWeight: 500 }}>
           ← Dashboard
         </button>
-        <span style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 15, color: 'rgba(134,179,105,0.4)', fontStyle: 'italic', letterSpacing: 0.3 }}>Alumni Profile</span>
+        <span style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 15, color: 'rgba(134,179,105,0.4)', fontStyle: 'italic' }}>Alumni Profile</span>
         <div style={{ display: 'flex', gap: 8 }}>
           {profile ? (
             <>
@@ -230,57 +253,50 @@ export default function ProfileViewPage() {
 
       <div className="mp" style={{ maxWidth: 740, margin: '0 auto', padding: '22px 16px 80px' }}>
 
-        {/* ── Hero ── */}
+        {/* Hero */}
         <div className="glass a1" style={{ marginBottom: 14, overflow: 'hidden' }}>
           <div className="cover" style={{ position: 'relative' }}>
             <div className="cover-tag">HPCAA Alumni</div>
-            <div className="av">
+
+            {/* Avatar — clickable for full view */}
+            <div className="av" onClick={() => avatar && setAvatarFull(true)}>
               {avatar
                 ? <img src={avatar} alt={userName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : <span style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 40, fontWeight: 700, color: '#86b369' }}>{initials}</span>
+                : <span style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 44, fontWeight: 700, color: '#86b369' }}>{initials}</span>
               }
+              {/* Click hint overlay */}
+              {avatar && (
+                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', borderRadius: '50%' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.3)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,0,0,0)'}>
+                  <span style={{ fontSize: 20, opacity: 0, transition: 'opacity 0.2s' }}
+                    onMouseEnter={e => { e.currentTarget.style.opacity = 1; e.currentTarget.parentElement.style.background = 'rgba(0,0,0,0.3)' }}
+                    onMouseLeave={e => { e.currentTarget.style.opacity = 0 }}>🔍</span>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="hero-pad" style={{ padding: '74px 24px 26px' }}>
+          <div className="hero-pad" style={{ padding: '88px 24px 26px' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <h1 className="h1-size" style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 28, fontWeight: 700, color: '#f0ede6', marginBottom: 4, lineHeight: 1.2, letterSpacing: 0.2 }}>
+                <h1 className="h1-size" style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 30, fontWeight: 700, color: '#f0ede6', marginBottom: 4, lineHeight: 1.2 }}>
                   {profile?.fullName || userName}
                 </h1>
                 {profile?.fullNameBn && (
-                  <p style={{ fontFamily: 'Noto Serif Bengali, serif', fontSize: 17, color: 'rgba(134,179,105,0.75)', marginBottom: 10, fontWeight: 600 }}>{profile.fullNameBn}</p>
+                  <p style={{ fontFamily: 'Noto Serif Bengali, serif', fontSize: 18, color: 'rgba(134,179,105,0.75)', marginBottom: 10, fontWeight: 600 }}>{profile.fullNameBn}</p>
                 )}
-
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
-                  {profile?.memberType && (
-                    <span className="bdg" style={{ background: 'rgba(234,179,8,0.08)', color: '#fbbf24', border: '1px solid rgba(234,179,8,0.18)' }}>
-                      ⭐ {profile.memberType === 'life' ? 'Life Member' : profile.memberType === 'honorary' ? 'Honorary' : 'General Member'}
-                    </span>
-                  )}
-                  {profile?.committeePosition && (
-                    <span className="bdg" style={{ background: 'rgba(134,179,105,0.09)', color: '#86b369', border: '1px solid rgba(134,179,105,0.18)' }}>
-                      🏛️ {profile.committeePosition}
-                    </span>
-                  )}
-                  {profile?.bloodGroup && (
-                    <span className="bdg" style={{ background: 'rgba(220,38,38,0.09)', color: '#f87171', border: '1px solid rgba(220,38,38,0.18)' }}>
-                      🩸 {profile.bloodGroup}
-                    </span>
-                  )}
-                  {session?.user?.role && (
-                    <span className="bdg" style={{ background: 'rgba(99,102,241,0.09)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.18)' }}>
-                      🎓 {session.user.role}
-                    </span>
-                  )}
+                  {profile?.memberType && <span className="bdg" style={{ background: 'rgba(234,179,8,0.08)', color: '#fbbf24', border: '1px solid rgba(234,179,8,0.18)' }}>⭐ {profile.memberType === 'life' ? 'Life Member' : profile.memberType === 'honorary' ? 'Honorary' : 'General Member'}</span>}
+                  {profile?.committeePosition && <span className="bdg" style={{ background: 'rgba(134,179,105,0.09)', color: '#86b369', border: '1px solid rgba(134,179,105,0.18)' }}>🏛️ {profile.committeePosition}</span>}
+                  {profile?.bloodGroup && <span className="bdg" style={{ background: 'rgba(220,38,38,0.09)', color: '#f87171', border: '1px solid rgba(220,38,38,0.18)' }}>🩸 {profile.bloodGroup}</span>}
+                  {session?.user?.role && <span className="bdg" style={{ background: 'rgba(99,102,241,0.09)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.18)' }}>🎓 {session.user.role}</span>}
                 </div>
-
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>📧 {session?.user?.email}</span>
                   {profile?.district && <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>📍 {profile.district}{profile.upazila ? `, ${profile.upazila}` : ''}</span>}
                   {profile?.memberSince && <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>📅 Member since {new Date(profile.memberSince).getFullYear()}</span>}
                 </div>
-
                 {(profile?.facebook || profile?.portfolioWebsite || profile?.whatsAppNumber) && (
                   <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
                     {profile?.facebook && <a href={profile.facebook} target="_blank" rel="noreferrer" className="sl">📘 Facebook</a>}
@@ -302,8 +318,8 @@ export default function ProfileViewPage() {
                       style={{ transition: 'stroke-dasharray 1.3s ease' }}
                     />
                   </svg>
-                  <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 17, fontWeight: 700, color: '#e8e4db', lineHeight: 1 }}>{completion}%</span>
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 17, fontWeight: 700, color: '#e8e4db' }}>{completion}%</span>
                   </div>
                 </div>
                 <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', letterSpacing: 1.2, textTransform: 'uppercase' }}>Complete</span>
@@ -313,14 +329,21 @@ export default function ProfileViewPage() {
             {profile?.shortBio && (
               <div style={{ marginTop: 18, padding: '13px 16px', background: 'rgba(134,179,105,0.05)', borderRadius: 11, borderLeft: '3px solid rgba(134,179,105,0.35)' }}>
                 <p style={{ fontSize: 13, color: 'rgba(232,228,219,0.75)', lineHeight: 1.85, fontStyle: 'italic', fontFamily: 'Cormorant Garamond, serif' }}>
-                  “{profile.shortBio}”
+                  &ldquo;{profile.shortBio}&rdquo;
                 </p>
+              </div>
+            )}
+
+            {/* Tap hint */}
+            {avatar && (
+              <div style={{ marginTop: 10, fontSize: 10, color: 'rgba(134,179,105,0.3)', letterSpacing: 0.5 }}>
+                💡 Profile photo তে click করলে full size দেখাবে
               </div>
             )}
           </div>
         </div>
 
-        {/* ── No Profile ── */}
+        {/* No Profile */}
         {!profile && (
           <div className="glass a2">
             <div className="empty">
@@ -338,7 +361,7 @@ export default function ProfileViewPage() {
 
         {profile && (
           <>
-            {/* ── Tab Bar ── */}
+            {/* Tab Bar */}
             <div className="glass a2" style={{ padding: '6px', marginBottom: 12 }}>
               <div className="tab-bar">
                 {TABS.map(t => (
@@ -350,10 +373,9 @@ export default function ProfileViewPage() {
               </div>
             </div>
 
-            {/* ── TAB: INFO ── */}
+            {/* TAB: INFO */}
             {tab === 'info' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, animation: 'si 0.3s ease both' }}>
-
                 <div className="glass a3" style={{ padding: '20px 20px' }}>
                   <SH icon="👤" title="Basic Information" />
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px' }}>
@@ -377,64 +399,32 @@ export default function ProfileViewPage() {
                     <Row label="WhatsApp" value={profile.whatsAppNumber} />
                   </div>
 
-                  {/* 📍 Updated Location Section with Leaflet Map */}
+                  {/* Location Map */}
                   {profile.latitude && profile.longitude && (
-                    <div style={{ marginTop: 16 }}>
-                      {/* Coords info & Map Link */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, padding: '8px 12px', background: 'rgba(134,179,105,0.06)', borderRadius: 10, border: '1px solid rgba(134,179,105,0.12)' }}>
-                        <span style={{ fontSize: 16 }}>📍</span>
+                    <div style={{ marginTop: 18 }}>
+                      {/* Coords bar */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, padding: '10px 14px', background: 'rgba(134,179,105,0.06)', borderRadius: 12, border: '1px solid rgba(134,179,105,0.14)' }}>
+                        <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,rgba(134,179,105,0.2),rgba(134,179,105,0.08))', border: '1px solid rgba(134,179,105,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, flexShrink: 0 }}>📍</div>
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 12, color: '#86b369', fontWeight: 600 }}>Location</div>
-                          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
+                          <div style={{ fontSize: 12, color: '#86b369', fontWeight: 600, marginBottom: 2 }}>Location</div>
+                          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontFamily: 'monospace' }}>
                             {Number(profile.latitude).toFixed(6)}, {Number(profile.longitude).toFixed(6)}
                           </div>
-                          {profile.locationDms && (
-                            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>{profile.locationDms}</div>
-                          )}
+                          {profile.locationDms && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.22)' }}>{profile.locationDms}</div>}
                         </div>
-                        <a 
-                          href={`https://www.google.com/maps?q=${profile.latitude},${profile.longitude}`} 
-                          target="_blank" rel="noreferrer" 
-                          className="sl"
-                          style={{ flexShrink: 0, fontSize: 12, padding: '6px 12px' }}
-                        >
-                          🗺️ Google Maps
+                        <a href={`https://www.google.com/maps?q=${profile.latitude},${profile.longitude}`}
+                          target="_blank" rel="noreferrer" className="sl"
+                          style={{ flexShrink: 0, fontSize: 11, padding: '6px 12px' }}>
+                          🗺️ Maps
                         </a>
                       </div>
 
-                      {/* Leaflet Map Frame */}
-                      <div style={{ borderRadius: 14, overflow: 'hidden', border: '1.5px solid rgba(134,179,105,0.18)' }}>
+                      {/* Colorful Leaflet Map */}
+                      <div style={{ borderRadius: 14, overflow: 'hidden', border: '1.5px solid rgba(134,179,105,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
                         <iframe
-                          srcDoc={`<!DOCTYPE html>
-                          <html>
-                          <head>
-                          <meta name="viewport" content="width=device-width,initial-scale=1">
-                          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
-                          <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"><\/script>
-                          <style>
-                            *{margin:0;padding:0;box-sizing:border-box}
-                            html,body,#map{width:100%;height:100%;background:#060f06}
-                            .cm{width:16px;height:16px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#86b369;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.5)}
-                            .leaflet-popup-content-wrapper{background:#0d1a0d;border:1px solid rgba(134,179,105,0.3);border-radius:10px;color:#e8e4db;font-family:sans-serif}
-                            .leaflet-popup-tip{background:#0d1a0d}
-                            .leaflet-popup-content{font-size:12px;line-height:1.6;color:#c8dba8;margin:8px 12px}
-                            .leaflet-tile{filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);}
-                          </style>
-                          </head>
-                          <body>
-                          <div id="map"></div>
-                          <script>
-                            const lat = ${profile.latitude};
-                            const lng = ${profile.longitude};
-                            const map = L.map('map', { zoomControl: true, dragging: true, scrollWheelZoom: false }).setView([lat, lng], 15);
-                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-                            const icon = L.divIcon({ className: '', html: '<div class="cm"></div>', iconSize: [16, 16], iconAnchor: [8, 16], popupAnchor: [0, -18] });
-                            L.marker([lat, lng], { icon }).addTo(map).bindPopup('<b>📍 Location</b><br>' + lat.toFixed(6) + ', ' + lng.toFixed(6)).openPopup();
-                          <\/script>
-                          </body>
-                          </html>`}
+                          srcDoc={mapHtml(profile.latitude, profile.longitude)}
                           width="100%"
-                          height="240"
+                          height="260"
                           style={{ display: 'block', border: 'none' }}
                           title="Profile Location Map"
                         />
@@ -445,7 +435,7 @@ export default function ProfileViewPage() {
               </div>
             )}
 
-            {/* ── TAB: EDUCATION ── */}
+            {/* TAB: EDUCATION */}
             {tab === 'edu' && (
               <div className="glass a3" style={{ padding: '20px 20px', animation: 'si 0.3s ease both' }}>
                 <SH icon="🏫" title="School" />
@@ -454,14 +444,12 @@ export default function ProfileViewPage() {
                   <Row label="Group" value={profile.schoolGroup} />
                   <Row label="Passing Year" value={profile.schoolPassingYear} />
                 </div>
-
                 <SH icon="🏛️" title="College" />
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px' }}>
                   <Row label="কলেজ" value={profile.collegeName} />
                   <Row label="বিভাগ" value={profile.collegeGroup === 'science' ? 'বিজ্ঞান' : profile.collegeGroup === 'arts' ? 'মানবিক' : profile.collegeGroup === 'commerce' ? 'বাণিজ্য' : profile.collegeGroup} />
                   <Row label="Passing Year" value={profile.collegePassingYear} />
                 </div>
-
                 <SH icon="🎓" title="University" />
                 <Row label="University" value={profile.universityName} />
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px' }}>
@@ -473,11 +461,10 @@ export default function ProfileViewPage() {
               </div>
             )}
 
-            {/* ── TAB: BLOOD ── */}
+            {/* TAB: BLOOD */}
             {tab === 'blood' && (
               <div className="glass a3" style={{ padding: '20px 20px', animation: 'si 0.3s ease both' }}>
                 <SH icon="🩸" title="Blood Information" />
-
                 <div style={{ display: 'flex', alignItems: 'center', gap: 20, padding: '18px', background: 'linear-gradient(135deg,rgba(220,38,38,0.07),rgba(127,29,29,0.04))', borderRadius: 14, border: '1px solid rgba(220,38,38,0.14)', marginBottom: 18 }}>
                   {profile.bloodGroup
                     ? <div className="bc">{profile.bloodGroup}</div>
@@ -497,13 +484,11 @@ export default function ProfileViewPage() {
                     )}
                   </div>
                 </div>
-
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 4 }}>
                   <div className="tile">
                     <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 6 }}>Total Donations</div>
                     <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 32, fontWeight: 700, color: '#f87171', lineHeight: 1 }}>
-                      {profile.totalDonationCount || 0}
-                      <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', fontFamily: 'Outfit, sans-serif', marginLeft: 4 }}>বার</span>
+                      {profile.totalDonationCount || 0}<span style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', fontFamily: 'Outfit, sans-serif', marginLeft: 4 }}>বার</span>
                     </div>
                   </div>
                   <div className="tile">
@@ -513,7 +498,6 @@ export default function ProfileViewPage() {
                     </div>
                   </div>
                 </div>
-
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px' }}>
                   <Row label="Last Donation" value={profile.lastDonationDate ? new Date(profile.lastDonationDate).toLocaleDateString('bn-BD') : null} />
                   <Row label="Next Available" value={profile.nextAvailableDonationDate ? new Date(profile.nextAvailableDonationDate).toLocaleDateString('bn-BD') : null} />
@@ -521,7 +505,7 @@ export default function ProfileViewPage() {
               </div>
             )}
 
-            {/* ── TAB: BIO ── */}
+            {/* TAB: BIO */}
             {tab === 'bio' && (
               <div className="glass a3" style={{ padding: '20px 20px', animation: 'si 0.3s ease both' }}>
                 <SH icon="✍️" title="Personal Bio" />
