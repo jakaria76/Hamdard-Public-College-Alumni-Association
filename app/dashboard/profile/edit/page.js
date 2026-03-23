@@ -452,60 +452,150 @@ export default function ProfileEditPage() {
 
             {/* CONTACT */}
             {activeTab === 'contact' && (
-              <div>
-                <div className="sh"><div className="sh-icon">📞</div><span className="sh-text">Contact Information</span></div>
-                <div className="fg">
-                  <label className="flabel">বর্তমান ঠিকানা</label>
-                  <textarea className="ftextarea" name="presentAddress" value={form.presentAddress} onChange={handleChange} placeholder="তোমার বর্তমান ঠিকানা" rows={3} />
-                </div>
-                <div className="fg">
-                  <label className="flabel">স্থায়ী ঠিকানা</label>
-                  <textarea className="ftextarea" name="permanentAddress" value={form.permanentAddress} onChange={handleChange} placeholder="তোমার স্থায়ী ঠিকানা" rows={3} />
-                </div>
-                <div className="fr">
-                  <div className="fg">
-                    <label className="flabel">জেলা</label>
-                    <select className="fselect" name="district" value={form.district} onChange={handleChange}>
-                      <option value="">জেলা select করো</option>
-                      {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
-                    </select>
-                  </div>
-                  <div className="fg">
-                    <label className="flabel">উপজেলা</label>
-                    <input className="finput" name="upazila" value={form.upazila} onChange={handleChange} placeholder="উপজেলার নাম" />
-                  </div>
-                </div>
-                <div className="fr">
-                  <div className="fg">
-                    <label className="flabel">Alternative Mobile</label>
-                    <input className="finput" name="alternativeMobile" value={form.alternativeMobile} onChange={handleChange} placeholder="01XXXXXXXXX" />
-                  </div>
-                  <div className="fg">
-                    <label className="flabel">WhatsApp</label>
-                    <input className="finput" name="whatsAppNumber" value={form.whatsAppNumber} onChange={handleChange} placeholder="01XXXXXXXXX" />
-                  </div>
-                </div>
-                <div className="fg">
-                  <label className="flabel">Facebook Link</label>
-                  <input className="finput" name="facebookLink" value={form.facebookLink} onChange={handleChange} placeholder="https://facebook.com/yourname" />
-                </div>
-                <div className="sh" style={{ marginTop: 20 }}><div className="sh-icon">📍</div><span className="sh-text">Location (Optional)</span></div>
-                <div className="fr3">
-                  <div className="fg">
-                    <label className="flabel">Latitude</label>
-                    <input className="finput" type="number" step="any" name="latitude" value={form.latitude} onChange={handleChange} placeholder="23.8103" />
-                  </div>
-                  <div className="fg">
-                    <label className="flabel">Longitude</label>
-                    <input className="finput" type="number" step="any" name="longitude" value={form.longitude} onChange={handleChange} placeholder="90.4125" />
-                  </div>
-                  <div className="fg">
-                    <label className="flabel">DMS</label>
-                    <input className="finput" name="locationDms" value={form.locationDms} onChange={handleChange} placeholder="23°48'N" />
-                  </div>
-                </div>
-              </div>
-            )}
+  <div>
+    <div className="sh"><div className="sh-icon">📞</div><span className="sh-text">Contact Information</span></div>
+    <div className="fg">
+      <label className="flabel">বর্তমান ঠিকানা</label>
+      <textarea className="ftextarea" name="presentAddress" value={form.presentAddress} onChange={handleChange} placeholder="তোমার বর্তমান ঠিকানা" rows={3} />
+    </div>
+    <div className="fg">
+      <label className="flabel">স্থায়ী ঠিকানা</label>
+      <textarea className="ftextarea" name="permanentAddress" value={form.permanentAddress} onChange={handleChange} placeholder="তোমার স্থায়ী ঠিকানা" rows={3} />
+    </div>
+    <div className="fr">
+      <div className="fg">
+        <label className="flabel">জেলা</label>
+        <select className="fselect" name="district" value={form.district} onChange={handleChange}>
+          <option value="">জেলা select করো</option>
+          {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
+        </select>
+      </div>
+      <div className="fg">
+        <label className="flabel">উপজেলা</label>
+        <input className="finput" name="upazila" value={form.upazila} onChange={handleChange} placeholder="উপজেলার নাম" />
+      </div>
+    </div>
+    <div className="fr">
+      <div className="fg">
+        <label className="flabel">Alternative Mobile</label>
+        <input className="finput" name="alternativeMobile" value={form.alternativeMobile} onChange={handleChange} placeholder="01XXXXXXXXX" />
+      </div>
+      <div className="fg">
+        <label className="flabel">WhatsApp</label>
+        <input className="finput" name="whatsAppNumber" value={form.whatsAppNumber} onChange={handleChange} placeholder="01XXXXXXXXX" />
+      </div>
+    </div>
+    <div className="fg">
+      <label className="flabel">Facebook Link</label>
+      <input className="finput" name="facebookLink" value={form.facebookLink} onChange={handleChange} placeholder="https://facebook.com/yourname" />
+    </div>
+
+    {/* ── Location Picker ── */}
+    <div className="sh" style={{ marginTop: 24 }}><div className="sh-icon">📍</div><span className="sh-text">Location — Map এ click করে select করো</span></div>
+
+    {/* Map Container */}
+    <div style={{ borderRadius: 14, overflow: 'hidden', border: '1.5px solid rgba(134,179,105,0.2)', marginBottom: 14, position: 'relative' }}>
+      <iframe
+        key={`${form.latitude || 23.8103}-${form.longitude || 90.4125}`}
+        src={`https://maps.google.com/maps?q=${form.latitude || 23.8103},${form.longitude || 90.4125}&z=14&output=embed`}
+        width="100%"
+        height="260"
+        style={{ display: 'block', border: 'none' }}
+        loading="lazy"
+        allowFullScreen
+      />
+      <div style={{ position: 'absolute', bottom: 10, left: 10, background: 'rgba(6,15,6,0.85)', backdropFilter: 'blur(8px)', borderRadius: 8, padding: '6px 12px', fontSize: 11, color: 'rgba(134,179,105,0.8)', border: '1px solid rgba(134,179,105,0.15)' }}>
+        📍 {form.latitude ? `${Number(form.latitude).toFixed(4)}, ${Number(form.longitude).toFixed(4)}` : 'Location select হয়নি'}
+      </div>
+    </div>
+
+    {/* GPS Button */}
+    <button
+      type="button"
+      onClick={() => {
+        if (!navigator.geolocation) {
+          alert('তোমার browser এ geolocation support নেই')
+          return
+        }
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            const lat = pos.coords.latitude
+            const lng = pos.coords.longitude
+
+            // Reverse geocode করো
+            try {
+              const res = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=bn`
+              )
+              const data = await res.json()
+              const addr = data.address || {}
+
+              // DMS convert
+              const toDMS = (deg, isLat) => {
+                const d = Math.floor(Math.abs(deg))
+                const m = Math.floor((Math.abs(deg) - d) * 60)
+                const s = ((Math.abs(deg) - d - m / 60) * 3600).toFixed(1)
+                const dir = isLat ? (deg >= 0 ? 'N' : 'S') : (deg >= 0 ? 'E' : 'W')
+                return `${d}°${m}'${s}"${dir}`
+              }
+
+              setForm(prev => ({
+                ...prev,
+                latitude: lat,
+                longitude: lng,
+                locationDms: `${toDMS(lat, true)} ${toDMS(lng, false)}`,
+                // Auto-fill district/upazila if empty
+                district: prev.district || addr.county || addr.state_district || '',
+                upazila: prev.upazila || addr.suburb || addr.village || addr.town || '',
+                presentAddress: prev.presentAddress || data.display_name || '',
+              }))
+            } catch {
+              setForm(prev => ({
+                ...prev,
+                latitude: lat,
+                longitude: lng,
+              }))
+            }
+          },
+          (err) => {
+            alert('Location access দাও: ' + err.message)
+          },
+          { enableHighAccuracy: true }
+        )
+      }}
+      style={{
+        width: '100%', padding: '13px', marginBottom: 14,
+        background: 'linear-gradient(135deg,rgba(134,179,105,0.12),rgba(134,179,105,0.06))',
+        border: '1.5px solid rgba(134,179,105,0.25)',
+        borderRadius: 12, color: '#86b369', fontSize: 14, fontWeight: 600,
+        cursor: 'pointer', fontFamily: 'Outfit, sans-serif',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        transition: 'all 0.2s',
+      }}
+    >
+      📡 আমার Current Location নাও
+    </button>
+
+    {/* Manual input */}
+    <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 12, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.06)' }}>
+      <div style={{ fontSize: 10, color: 'rgba(134,179,105,0.45)', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 12, fontWeight: 700 }}>Manual Input (Optional)</div>
+      <div className="fr3">
+        <div className="fg" style={{ marginBottom: 0 }}>
+          <label className="flabel">Latitude</label>
+          <input className="finput" type="number" step="any" name="latitude" value={form.latitude} onChange={handleChange} placeholder="23.8103" />
+        </div>
+        <div className="fg" style={{ marginBottom: 0 }}>
+          <label className="flabel">Longitude</label>
+          <input className="finput" type="number" step="any" name="longitude" value={form.longitude} onChange={handleChange} placeholder="90.4125" />
+        </div>
+        <div className="fg" style={{ marginBottom: 0 }}>
+          <label className="flabel">DMS</label>
+          <input className="finput" name="locationDms" value={form.locationDms} onChange={handleChange} placeholder="23°48'N" />
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
             {/* EDUCATION */}
             {activeTab === 'education' && (
