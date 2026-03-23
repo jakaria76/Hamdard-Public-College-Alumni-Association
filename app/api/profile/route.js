@@ -29,7 +29,6 @@ const DATE_FIELDS = [
   'memberSince', 'dateOfBirth', 'lastDonationDate', 'nextAvailableDonationDate',
 ]
 
-// Profile model — safe get করো
 async function getProfileModel() {
   await connectDB()
   if (mongoose.models.Profile) {
@@ -40,19 +39,14 @@ async function getProfileModel() {
 }
 
 async function uploadImage(imageFile) {
-  try {
-    const bytes = await imageFile.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-    const base64 = `data:${imageFile.type};base64,${buffer.toString('base64')}`
-    const result = await cloudinary.uploader.upload(base64, {
-      folder: 'hpcaa/profiles',
-      transformation: [{ width: 400, height: 400, crop: 'fill' }],
-    })
-    return result.secure_url
-  } catch (err) {
-    console.error('Cloudinary error:', err)
-    throw new Error('Image upload failed')
-  }
+  const bytes = await imageFile.arrayBuffer()
+  const buffer = Buffer.from(bytes)
+  const base64 = `data:${imageFile.type};base64,${buffer.toString('base64')}`
+  const result = await cloudinary.uploader.upload(base64, {
+    folder: 'hpcaa/profiles',
+    transformation: [{ width: 400, height: 400, crop: 'fill' }],
+  })
+  return result.secure_url
 }
 
 function parseFormData(formData) {
@@ -91,10 +85,8 @@ export async function GET() {
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
     const Profile = await getProfileModel()
     const profile = await Profile.findOne({ userId: session.user.id }).lean()
-
     return NextResponse.json({ profile }, { status: 200 })
   } catch (error) {
     console.error('GET profile error:', error)
@@ -123,9 +115,15 @@ export async function POST(request) {
     const formData = await request.formData()
     const data = parseFormData(formData)
 
+    // ✅ Image upload — error হলে skip করো
     const imageFile = formData.get('imageFile')
     if (imageFile && imageFile.size > 0) {
-      data.profileImagePath = await uploadImage(imageFile)
+      try {
+        data.profileImagePath = await uploadImage(imageFile)
+      } catch (err) {
+        console.error('Image upload skipped:', err.message)
+        // image ছাড়াই profile create হবে
+      }
     }
 
     const profile = await Profile.create({
@@ -158,9 +156,15 @@ export async function PUT(request) {
     const formData = await request.formData()
     const data = parseFormData(formData)
 
+    // ✅ Image upload — error হলে skip করো
     const imageFile = formData.get('imageFile')
     if (imageFile && imageFile.size > 0) {
-      data.profileImagePath = await uploadImage(imageFile)
+      try {
+        data.profileImagePath = await uploadImage(imageFile)
+      } catch (err) {
+        console.error('Image upload skipped:', err.message)
+        // image ছাড়াই update হবে
+      }
     }
 
     const profile = await Profile.findOneAndUpdate(
@@ -189,10 +193,8 @@ export async function DELETE() {
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
     const Profile = await getProfileModel()
     await Profile.findOneAndDelete({ userId: session.user.id })
-
     return NextResponse.json(
       { message: 'Profile delete সফল!' },
       { status: 200 }
